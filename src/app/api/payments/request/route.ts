@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
       customerEmail,
       successUrl,
       failUrl,
+      method,
     } = body;
 
     // 환경 변수 확인
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Payment request data:", {
+    console.log("Payment request data (결제위젯 v2):", {
       amount,
       orderId,
       orderName,
@@ -33,27 +34,42 @@ export async function POST(request: NextRequest) {
       customerEmail,
       successUrl,
       failUrl,
+      method,
     });
 
-    // 토스페이먼츠 v1 API 요청 데이터 구성 (무통장입금 포함)
-    const tossRequestData = {
-      amount,
+    // 토스페이먼츠 결제위젯 v2 API 요청 데이터 구성
+    const tossRequestData: any = {
+      amount: {
+        currency: "KRW",
+        value: amount,
+      },
       orderId,
       orderName,
       customerName,
       customerEmail,
-      successUrl: "https://httpbin.org/get",
-      failUrl: "https://httpbin.org/get",
-      // 무통장입금 설정
-      virtualAccount: {
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0], // 7일 후 만료
-        customerName: customerName,
-      },
+      successUrl,
+      failUrl,
     };
 
-    console.log("Toss v1 API request data:", tossRequestData);
+    // 결제 수단에 따른 설정
+    if (method === "VIRTUAL_ACCOUNT") {
+      // 무통장입금 설정 (결제위젯 v2)
+      tossRequestData.method = "VIRTUAL_ACCOUNT";
+      tossRequestData.virtualAccount = {
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0], // 7일 후 만료 (YYYY-MM-DD 형식)
+        cashReceipt: {
+          type: "소득공제",
+        },
+        useEscrow: false,
+      };
+    } else {
+      // 카드 결제 (기본값)
+      tossRequestData.method = "CARD";
+    }
+
+    console.log("Toss 결제위젯 v2 API request data:", tossRequestData);
     console.log(
       "Toss API secret key (first 10 chars):",
       secretKey.substring(0, 10) + "..."
@@ -68,8 +84,8 @@ export async function POST(request: NextRequest) {
       authHeader.substring(0, 20) + "..."
     );
 
-    // 토스페이먼츠 v1 결제 요청 API 호출
-    const response = await fetch("https://api.tosspayments.com/v1/payments", {
+    // 토스페이먼츠 v2 결제 요청 API 호출
+    const response = await fetch("https://api.tosspayments.com/v2/payments", {
       method: "POST",
       headers: {
         Authorization: authHeader,
@@ -78,7 +94,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(tossRequestData),
     });
 
-    console.log("Toss v1 API response status:", response.status);
+    console.log("Toss 결제위젯 v2 API response status:", response.status);
     console.log(
       "Toss API response headers:",
       Object.fromEntries(response.headers.entries())
@@ -91,7 +107,7 @@ export async function POST(request: NextRequest) {
       } catch (e) {
         errorData = { message: "응답을 파싱할 수 없습니다." };
       }
-      console.error("Toss v1 API error:", errorData);
+      console.error("Toss 결제위젯 v2 API error:", errorData);
       return NextResponse.json(
         {
           error: "결제 요청에 실패했습니다.",
@@ -102,25 +118,25 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log("Toss v1 API success response:", data);
+    console.log("Toss 결제위젯 v2 API success response:", data);
     console.log("Toss API response keys:", Object.keys(data));
-    console.log("Toss API nextRedirectPcUrl:", data.nextRedirectPcUrl);
+    console.log("Toss API checkout.url:", data.checkout?.url);
     console.log("Toss API paymentKey:", data.paymentKey);
 
     // 응답 데이터 검증
-    if (!data.nextRedirectPcUrl) {
-      console.error("Toss API response missing nextRedirectPcUrl:", data);
+    if (!data.checkout?.url) {
+      console.error("Toss API response missing checkout.url:", data);
       return NextResponse.json(
         {
           error: "토스페이먼츠에서 결제 URL을 반환하지 않았습니다.",
-          details: "nextRedirectPcUrl이 응답에 없습니다.",
+          details: "checkout.url이 응답에 없습니다.",
         },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
-      paymentUrl: data.nextRedirectPcUrl,
+      paymentUrl: data.checkout.url,
       paymentKey: data.paymentKey,
     });
   } catch (error) {

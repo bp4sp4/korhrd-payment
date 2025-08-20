@@ -44,7 +44,7 @@ export default function Home() {
                   <div className="flex justify-between items-center py-3 border-b border-gray-200">
                     <span className="text-black">결제 금액</span>
                     <span className="text-2xl font-bold text-black">
-                      {formatCurrency(50000)}
+                      {formatCurrency(40000)}
                     </span>
                   </div>
 
@@ -140,7 +140,7 @@ export default function Home() {
                   </div>
 
                   <PaymentButton
-                    amount={50000}
+                    amount={40000}
                     orderName="프리미엄 서비스 1개월"
                     customerName="홍길동"
                     customerEmail="hong@example.com"

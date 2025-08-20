@@ -6,10 +6,9 @@ export interface TossPaymentRequest {
   customerEmail: string;
   successUrl: string;
   failUrl: string;
-  method?: string[]; // v2 API에서는 배열로 지원
+  method?: string; // v2 API에서는 단일 문자열로 지원
   virtualAccount?: {
     dueDate: string;
-    customerName: string;
   };
 }
 

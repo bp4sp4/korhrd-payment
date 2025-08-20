@@ -16,30 +16,6 @@ interface PaymentButtonProps {
   onError?: (error: string) => void;
 }
 
-interface PaymentRequestData {
-  amount: {
-    currency: string;
-    value: number;
-  };
-  orderId: string;
-  orderName: string;
-  customerEmail: string;
-  customerName: string;
-  successUrl: string;
-  failUrl: string;
-  method?: string;
-  card?: {
-    useEscrow: boolean;
-    flowMode: string;
-    useCardPoint: boolean;
-    useAppCardOnly: boolean;
-  };
-  virtualAccount?: {
-    dueDate: string;
-    customerName: string;
-  };
-}
-
 export function PaymentButton({
   amount,
   orderName,
@@ -50,31 +26,54 @@ export function PaymentButton({
   onError,
 }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [payment, setPayment] = useState<{
-    requestPayment: (data: PaymentRequestData) => Promise<void>;
-  } | null>(null);
+  const [payment, setPayment] = useState<any>(null);
 
   // 토스페이먼츠 SDK 초기화
   useEffect(() => {
     async function initializeTossPayments() {
       try {
-        const clientKey =
-          process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ||
-          "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq";
+        // 사용자의 토스페이먼츠 API 키
+        const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+
+        console.log("=== 토스페이먼츠 API 키 확인 ===");
+        console.log("환경 변수 NEXT_PUBLIC_TOSS_CLIENT_KEY:", clientKey);
+        console.log("환경 변수 타입:", typeof clientKey);
+        console.log("환경 변수 길이:", clientKey?.length);
+
+        if (!clientKey) {
+          console.error(
+            "❌ NEXT_PUBLIC_TOSS_CLIENT_KEY가 설정되지 않았습니다."
+          );
+          onError?.("토스페이먼츠 API 키가 설정되지 않았습니다.");
+          return;
+        }
+
+        if (!clientKey.startsWith("test_ck_")) {
+          console.error("❌ 잘못된 클라이언트 키 형식:", clientKey);
+          onError?.("토스페이먼츠 API 키 형식이 올바르지 않습니다.");
+          return;
+        }
+
+        console.log("✅ 토스페이먼츠 API 키 확인 완료:", clientKey);
+        console.log("토스페이먼츠 SDK 초기화 시작...");
+
         const tossPayments = await loadTossPayments(clientKey);
+        console.log("토스페이먼츠 SDK 로드 완료:", tossPayments);
 
         // 비회원 결제로 설정
         const paymentInstance = tossPayments.payment({
           customerKey: ANONYMOUS,
         });
 
-        setPayment(
-          paymentInstance as {
-            requestPayment: (data: PaymentRequestData) => Promise<void>;
-          }
-        );
+        console.log("토스페이먼츠 결제 인스턴스 생성 완료:", paymentInstance);
+
+        setPayment(paymentInstance);
+        console.log("✅ 토스페이먼츠 SDK 초기화 완료!");
       } catch (error) {
-        console.error("토스페이먼츠 SDK 초기화 오류:", error);
+        console.error("❌ 토스페이먼츠 SDK 초기화 오류:", error);
+        if (error instanceof Error) {
+          console.error("초기화 오류 상세:", error.stack);
+        }
         onError?.("토스페이먼츠 SDK 초기화에 실패했습니다.");
       }
     }
@@ -96,13 +95,13 @@ export function PaymentButton({
     setIsLoading(true);
 
     try {
-      // 주문 ID 생성
+      // 주문 ID 생성 (토스페이먼츠 권장 형식)
       const orderId = `order_${Date.now()}_${Math.random()
         .toString(36)
         .substring(2, 8)}`;
 
       // 결제 요청 데이터 구성
-      const paymentRequestData: PaymentRequestData = {
+      const paymentRequestData: any = {
         amount: {
           currency: "KRW",
           value: amount,
@@ -111,50 +110,64 @@ export function PaymentButton({
         orderName: orderName,
         customerEmail: customerEmail,
         customerName: customerName,
+        customerMobilePhone: "01012341234", // 가상계좌 안내 보내는 번호
         successUrl: `${window.location.origin}/payment/success`,
         failUrl: `${window.location.origin}/payment/fail`,
       };
 
       // 선택된 결제 수단에 따라 설정
       const selectedMethod = selectedMethods[0];
+      console.log("선택된 결제 수단:", selectedMethod);
 
       if (selectedMethod === "VIRTUAL_ACCOUNT") {
-        // 무통장입금 선택된 경우
+        // 무통장입금 - 토스페이먼츠 결제위젯 v2 방식
+        console.log("무통장입금 설정 중 (결제위젯 v2)...");
+
         paymentRequestData.method = "VIRTUAL_ACCOUNT";
+        paymentRequestData.successUrl = `${window.location.origin}/payment/success?method=VIRTUAL_ACCOUNT`;
+        paymentRequestData.failUrl = `${window.location.origin}/payment/fail?method=VIRTUAL_ACCOUNT`;
+
+        // 가상계좌 설정 (결제위젯 v2)
         paymentRequestData.virtualAccount = {
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             .toISOString()
             .split("T")[0], // 7일 후 만료
-          customerName: customerName,
+          cashReceipt: {
+            type: "소득공제",
+          },
+          useEscrow: false,
         };
+
+        console.log(
+          "무통장입금 설정 완료 (결제위젯 v2):",
+          paymentRequestData.virtualAccount
+        );
       } else {
         // 카드 결제 (기본값)
+        console.log("카드 결제 설정 중 (결제위젯 v2)...");
         paymentRequestData.method = "CARD";
-        paymentRequestData.card = {
-          useEscrow: false,
-          flowMode: "DEFAULT",
-          useCardPoint: false,
-          useAppCardOnly: false,
-        };
       }
 
-      console.log("토스페이먼츠 SDK 결제 요청:", paymentRequestData);
+      console.log("토스페이먼츠 결제위젯 v2 요청 데이터:", paymentRequestData);
+      console.log("토스페이먼츠 결제위젯 v2 인스턴스:", payment);
 
-      // 토스페이먼츠 SDK로 결제 요청
+      // 토스페이먼츠 결제위젯 v2로 결제창 띄우기
       await payment.requestPayment(paymentRequestData);
 
       // 결제창이 열리면 로딩 상태 해제
       setIsLoading(false);
     } catch (error) {
-      console.error("결제 요청 오류:", error);
+      console.error("결제위젯 v2 요청 오류:", error);
       setIsLoading(false);
 
       let errorMessage = "결제 중 오류가 발생했습니다.";
       if (error instanceof Error) {
         errorMessage = error.message;
+        console.error("Error details:", error.stack);
       } else if (typeof error === "object" && error !== null) {
-        const errorObj = error as { message?: string };
+        const errorObj = error as { message?: string; code?: string };
         errorMessage = errorObj.message || errorMessage;
+        console.error("Error object:", errorObj);
       }
 
       onError?.(errorMessage);
