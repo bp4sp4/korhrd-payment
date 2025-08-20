@@ -34,6 +34,10 @@ interface PaymentRequestData {
     useCardPoint: boolean;
     useAppCardOnly: boolean;
   };
+  virtualAccount?: {
+    dueDate: string;
+    customerName: string;
+  };
 }
 
 export function PaymentButton({
@@ -80,7 +84,7 @@ export function PaymentButton({
 
   const handlePayment = async () => {
     if (selectedMethods.length === 0) {
-      onError?.("최소 하나의 결제 수단을 선택해주세요.");
+      onError?.("결제 수단을 선택해주세요.");
       return;
     }
 
@@ -112,20 +116,19 @@ export function PaymentButton({
       };
 
       // 선택된 결제 수단에 따라 설정
-      if (selectedMethods.includes("VIRTUAL_ACCOUNT")) {
+      const selectedMethod = selectedMethods[0];
+
+      if (selectedMethod === "VIRTUAL_ACCOUNT") {
         // 무통장입금 선택된 경우
         paymentRequestData.method = "VIRTUAL_ACCOUNT";
-      } else if (selectedMethods.includes("CARD")) {
-        // 카드만 선택된 경우
-        paymentRequestData.method = "CARD";
-        paymentRequestData.card = {
-          useEscrow: false,
-          flowMode: "DEFAULT",
-          useCardPoint: false,
-          useAppCardOnly: false,
+        paymentRequestData.virtualAccount = {
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0], // 7일 후 만료
+          customerName: customerName,
         };
       } else {
-        // 기본값: 카드 결제
+        // 카드 결제 (기본값)
         paymentRequestData.method = "CARD";
         paymentRequestData.card = {
           useEscrow: false,
@@ -158,6 +161,21 @@ export function PaymentButton({
     }
   };
 
+  // 버튼 텍스트 결정
+  const getButtonText = () => {
+    if (isLoading) return "결제창 열는 중...";
+    if (!payment) return "SDK 초기화 중...";
+    if (selectedMethods.length === 0) return "결제 수단을 선택해주세요";
+
+    const selectedMethod = selectedMethods[0];
+
+    if (selectedMethod === "VIRTUAL_ACCOUNT") {
+      return "무통장입금으로 결제하기";
+    } else {
+      return "카드로 결제하기";
+    }
+  };
+
   return (
     <button
       onClick={handlePayment}
@@ -172,13 +190,7 @@ export function PaymentButton({
       ) : (
         <CreditCard className="w-5 h-5" />
       )}
-      {isLoading
-        ? "결제창 열는 중..."
-        : !payment
-        ? "SDK 초기화 중..."
-        : selectedMethods.length === 0
-        ? "결제 수단을 선택해주세요"
-        : "토스페이먼츠 SDK로 결제하기"}
+      {getButtonText()}
     </button>
   );
 }

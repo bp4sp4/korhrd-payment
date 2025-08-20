@@ -1,9 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { PaymentButton } from "@/components/PaymentButton";
 import { formatCurrency } from "@/lib/utils";
+import { CreditCard, Building2 } from "lucide-react";
 
 export default function Home() {
+  const [selectedMethod, setSelectedMethod] = useState<string>("CARD");
+
+  const handleMethodChange = (method: string) => {
+    setSelectedMethod(method);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
@@ -11,11 +19,9 @@ export default function Home() {
           {/* 헤더 */}
           <div className="text-center mb-16">
             <h1 className="text-4xl font-bold text-black mb-4">
-              회사 결제 시스템
+              한평생결제전용사이트
             </h1>
-            <p className="text-xl text-black">
-              안전하고 편리한 토스페이먼츠 결제 서비스
-            </p>
+            <p className="text-xl text-black">안전하고 간편하게 결제하세요</p>
           </div>
 
           {/* 결제 카드 */}
@@ -97,11 +103,48 @@ export default function Home() {
                     />
                   </div>
 
+                  {/* 결제 수단 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-3">
+                      결제 수단 선택
+                    </label>
+                    <div className="space-y-3">
+                      <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="CARD"
+                          checked={selectedMethod === "CARD"}
+                          onChange={() => handleMethodChange("CARD")}
+                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <CreditCard className="w-5 h-5 text-blue-600" />
+                        <span className="text-black font-medium">신용카드</span>
+                      </label>
+
+                      <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="VIRTUAL_ACCOUNT"
+                          checked={selectedMethod === "VIRTUAL_ACCOUNT"}
+                          onChange={() => handleMethodChange("VIRTUAL_ACCOUNT")}
+                          className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        />
+                        <Building2 className="w-5 h-5 text-green-600" />
+                        <span className="text-black font-medium">
+                          무통장입금
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
                   <PaymentButton
                     amount={50000}
                     orderName="프리미엄 서비스 1개월"
                     customerName="홍길동"
                     customerEmail="hong@example.com"
+                    selectedMethods={[selectedMethod]}
                     className="w-full"
                     onSuccess={(paymentKey) => {
                       console.log("결제 성공:", paymentKey);
@@ -127,6 +170,7 @@ export default function Home() {
               <li>
                 • 카드, 계좌이체, 가상계좌 등 다양한 결제 수단을 지원합니다.
               </li>
+              <li>• 무통장입금의 경우 입금 확인 후 서비스가 시작됩니다.</li>
               <li>• 결제 완료 후 이메일로 영수증이 발송됩니다.</li>
               <li>• 문의사항이 있으시면 고객센터로 연락해주세요.</li>
             </ul>
