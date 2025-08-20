@@ -1,6 +1,23 @@
+"use client";
+
 import Image from "next/image";
+import { PaymentButton } from "@/components/PaymentButton";
+import { useState } from "react";
 
 export default function Home() {
+  const [selectedMethods, setSelectedMethods] = useState<string[]>([
+    "CARD",
+    "VIRTUAL_ACCOUNT",
+  ]);
+
+  const handleMethodToggle = (method: string) => {
+    setSelectedMethods((prev) =>
+      prev.includes(method)
+        ? prev.filter((m) => m !== method)
+        : [...prev, method]
+    );
+  };
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -12,6 +29,81 @@ export default function Home() {
           height={38}
           priority
         />
+
+        {/* 결제 섹션 추가 */}
+        <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+            토스페이먼츠 SDK v2 결제 테스트
+          </h2>
+
+          <div className="space-y-4">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                주문 정보
+              </h3>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                <p>상품명: 테스트 상품</p>
+                <p>금액: 1,000원</p>
+                <p>고객명: 테스트 고객</p>
+                <p>이메일: test@example.com</p>
+              </div>
+            </div>
+
+            {/* 결제 수단 선택 */}
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                결제 수단 선택
+              </h3>
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedMethods.includes("CARD")}
+                    onChange={() => handleMethodToggle("CARD")}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    신용카드
+                  </span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedMethods.includes("VIRTUAL_ACCOUNT")}
+                    onChange={() => handleMethodToggle("VIRTUAL_ACCOUNT")}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    무통장입금
+                  </span>
+                </label>
+              </div>
+              {selectedMethods.length === 0 && (
+                <p className="text-red-500 text-xs mt-2">
+                  최소 하나의 결제 수단을 선택해주세요.
+                </p>
+              )}
+            </div>
+
+            <PaymentButton
+              amount={1000}
+              orderName="테스트 상품"
+              customerName="테스트 고객"
+              customerEmail="test@example.com"
+              className="w-full"
+              selectedMethods={selectedMethods}
+              onSuccess={(paymentKey) => {
+                console.log("결제 성공:", paymentKey);
+                alert("결제가 성공했습니다!");
+              }}
+              onError={(error) => {
+                console.error("결제 실패:", error);
+                alert(`결제 실패: ${error}`);
+              }}
+            />
+          </div>
+        </div>
+
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
