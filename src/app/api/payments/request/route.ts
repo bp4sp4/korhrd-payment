@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 토스페이먼츠 결제위젯 v2 API 요청 데이터 구성
-    const tossRequestData: any = {
+    const tossRequestData: Record<string, unknown> = {
       amount: {
         currency: "KRW",
         value: amount,
@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       "Toss API secret key (first 10 chars):",
       secretKey.substring(0, 10) + "..."
     );
+    console.log("환경변수 출처: .env 파일 (서버사이드)");
 
     // Authorization 헤더 생성
     const authHeader = `Basic ${Buffer.from(secretKey + ":").toString(
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       let errorData;
       try {
         errorData = await response.json();
-      } catch (e) {
+      } catch {
         errorData = { message: "응답을 파싱할 수 없습니다." };
       }
       console.error("Toss 결제위젯 v2 API error:", errorData);

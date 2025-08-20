@@ -4,13 +4,15 @@
 
 ### 1.1 환경변수 설정
 
-`.env` 파일에 다음 내용이 설정되어 있는지 확인하세요:
+✅ `.env` 파일이 이미 설정되어 있습니다:
 
 ```env
 # 토스페이먼츠 설정 (테스트 환경)
 NEXT_PUBLIC_TOSS_CLIENT_KEY=test_ck_Z1aOwX7K8mzBbD5xNq703yQxzvNP
 TOSS_SECRET_KEY=test_sk_AQ92ymxN34vE9EzPpQ14rajRKXvd
 ```
+
+**중요**: `.env` 파일이 프로젝트 루트에 위치하고 있으며, Next.js가 자동으로 이 파일을 읽어서 환경변수를 로드합니다.
 
 ### 1.2 개발 서버 실행
 

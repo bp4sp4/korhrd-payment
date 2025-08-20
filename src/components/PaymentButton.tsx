@@ -26,7 +26,7 @@ export function PaymentButton({
   onError,
 }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [payment, setPayment] = useState<any>(null);
+  const [payment, setPayment] = useState<unknown>(null);
 
   // 토스페이먼츠 SDK 초기화
   useEffect(() => {
@@ -35,10 +35,11 @@ export function PaymentButton({
         // 사용자의 토스페이먼츠 API 키
         const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
 
-        console.log("=== 토스페이먼츠 API 키 확인 ===");
+        console.log("=== 토스페이먼츠 API 키 확인 (.env 파일) ===");
         console.log("환경 변수 NEXT_PUBLIC_TOSS_CLIENT_KEY:", clientKey);
         console.log("환경 변수 타입:", typeof clientKey);
         console.log("환경 변수 길이:", clientKey?.length);
+        console.log("환경 변수 출처: .env 파일");
 
         if (!clientKey) {
           console.error(
@@ -101,7 +102,7 @@ export function PaymentButton({
         .substring(2, 8)}`;
 
       // 결제 요청 데이터 구성
-      const paymentRequestData: any = {
+      const paymentRequestData: Record<string, unknown> = {
         amount: {
           currency: "KRW",
           value: amount,
@@ -152,7 +153,9 @@ export function PaymentButton({
       console.log("토스페이먼츠 결제위젯 v2 인스턴스:", payment);
 
       // 토스페이먼츠 결제위젯 v2로 결제창 띄우기
-      await payment.requestPayment(paymentRequestData);
+      await (
+        payment as { requestPayment: (data: unknown) => Promise<void> }
+      ).requestPayment(paymentRequestData);
 
       // 결제창이 열리면 로딩 상태 해제
       setIsLoading(false);

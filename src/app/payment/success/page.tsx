@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   CheckCircle,
   Home,
@@ -41,6 +41,107 @@ export default function PaymentSuccessPage() {
   const [statusCheckInterval, setStatusCheckInterval] =
     useState<NodeJS.Timeout | null>(null);
 
+  const fetchVirtualAccountInfo = useCallback(
+    async (paymentKey: string, orderId: string, amount: number) => {
+      try {
+        // 토스페이먼츠 결제 정보 조회 API 호출
+        const response = await fetch("/api/payments/confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            paymentKey,
+            orderId,
+            amount,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          console.log("무통장입금 정보 조회 응답:", {
+            status: data.status,
+            method: data.method,
+            virtualAccount: data.virtualAccount ? "있음" : "없음",
+            success: data.success,
+            message: data.message,
+          });
+
+          // API에서 404를 200으로 응답한 경우 (무통장입금 대기 상태)
+          if (data.success === false && data.paymentStatus === "PENDING") {
+            console.log("무통장입금 대기 상태 - 사용자가 아직 입금하지 않음");
+
+            // 임시 가상계좌 정보 생성 (실제로는 토스페이먼츠에서 제공해야 함)
+            const tempVirtualAccount: VirtualAccountInfo = {
+              accountNumber: "123-456789-01-234",
+              bankCode: "088",
+              bankName: "신한은행",
+              dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[0],
+              amount: amount,
+              orderId: orderId,
+              customerName: "홍길동",
+            };
+            setVirtualAccountInfo(tempVirtualAccount);
+
+            // 대기 상태로 설정
+            setPaymentInfo((prev) => ({
+              ...prev!,
+              status: "WAITING_FOR_DEPOSIT",
+            }));
+
+            console.log("무통장입금 대기 상태 설정 완료");
+            return;
+          }
+
+          // 가상계좌 정보 추출
+          if (data.virtualAccount) {
+            const virtualAccount: VirtualAccountInfo = {
+              accountNumber: data.virtualAccount.accountNumber,
+              bankCode: data.virtualAccount.bankCode,
+              bankName: getBankName(data.virtualAccount.bankCode),
+              dueDate: data.virtualAccount.dueDate,
+              amount: data.amount,
+              orderId: data.orderId,
+              customerName: "홍길동", // 실제로는 동적으로 가져와야 함
+              secret: data.secret, // 웹훅 검증용
+            };
+            setVirtualAccountInfo(virtualAccount);
+
+            // 무통장입금은 항상 WAITING_FOR_DEPOSIT 상태로 시작
+            // 실제 입금이 완료될 때까지 이 상태를 유지
+            // 토스페이먼츠에서 DONE으로 와도 강제로 WAITING_FOR_DEPOSIT로 설정
+            setPaymentInfo((prev) => ({
+              ...prev!,
+              status: "WAITING_FOR_DEPOSIT", // 강제로 대기 상태로 설정
+            }));
+
+            console.log(
+              "무통장입금 대기 상태로 설정됨 - 실제 입금 완료까지 대기"
+            );
+
+            // 무통장입금 상태 주기적 확인 시작 (30초마다)
+            const interval = setInterval(() => {
+              checkPaymentStatus(paymentKey);
+            }, 30000); // 30초마다 확인
+
+            setStatusCheckInterval(interval);
+          }
+        } else {
+          const errorData = await response.json();
+          console.error("무통장입금 정보 조회 실패:", errorData);
+        }
+      } catch (error) {
+        console.error("무통장입금 정보 조회 오류:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const paymentKey = urlParams.get("paymentKey");
@@ -79,199 +180,54 @@ export default function PaymentSuccessPage() {
         clearInterval(statusCheckInterval);
       }
     };
-  }, []);
+  }, [fetchVirtualAccountInfo, statusCheckInterval]);
 
-  const fetchVirtualAccountInfo = async (
-    paymentKey: string,
-    orderId: string,
-    amount: number
-  ) => {
-    try {
-      // 토스페이먼츠 결제 정보 조회 API 호출
-      const response = await fetch("/api/payments/confirm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          paymentKey,
-          orderId,
-          amount,
-        }),
-      });
+  const checkPaymentStatus = useCallback(
+    async (paymentKey: string) => {
+      try {
+        const response = await fetch(`/api/payments/status/${paymentKey}`);
 
-      if (response.ok) {
-        const data = await response.json();
+        if (response.ok) {
+          const data = await response.json();
 
-        console.log("무통장입금 정보 조회 응답:", {
-          status: data.status,
-          method: data.method,
-          virtualAccount: data.virtualAccount ? "있음" : "없음",
-          success: data.success,
-          message: data.message,
-        });
-
-        // API에서 404를 200으로 응답한 경우 (무통장입금 대기 상태)
-        if (data.success === false && data.paymentStatus === "PENDING") {
-          console.log("무통장입금 대기 상태 - 사용자가 아직 입금하지 않음");
-
-          // 임시 가상계좌 정보 생성 (실제로는 토스페이먼츠에서 제공해야 함)
-          const tempVirtualAccount: VirtualAccountInfo = {
-            accountNumber: "123-456789-01-234",
-            bankCode: "088",
-            bankName: "신한은행",
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-              .toISOString()
-              .split("T")[0],
-            amount: amount,
-            orderId: orderId,
-            customerName: "홍길동",
-          };
-          setVirtualAccountInfo(tempVirtualAccount);
-
-          // 대기 상태로 설정
-          setPaymentInfo((prev) => ({
-            ...prev!,
-            status: "WAITING_FOR_DEPOSIT",
-          }));
-
-          console.log("무통장입금 대기 상태 설정 완료");
-          return;
-        }
-
-        // 가상계좌 정보 추출
-        if (data.virtualAccount) {
-          const virtualAccount: VirtualAccountInfo = {
-            accountNumber: data.virtualAccount.accountNumber,
-            bankCode: data.virtualAccount.bankCode,
-            bankName: getBankName(data.virtualAccount.bankCode),
-            dueDate: data.virtualAccount.dueDate,
-            amount: data.amount,
+          console.log("결제 상태 확인:", {
+            status: data.status,
+            method: data.method,
             orderId: data.orderId,
-            customerName: "홍길동", // 실제로는 동적으로 가져와야 함
-            secret: data.secret, // 웹훅 검증용
-          };
-          setVirtualAccountInfo(virtualAccount);
-
-          // 무통장입금은 항상 WAITING_FOR_DEPOSIT 상태로 시작
-          // 실제 입금이 완료될 때까지 이 상태를 유지
-          // 토스페이먼츠에서 DONE으로 와도 강제로 WAITING_FOR_DEPOSIT로 설정
-          setPaymentInfo((prev) => ({
-            ...prev!,
-            status: "WAITING_FOR_DEPOSIT", // 강제로 대기 상태로 설정
-          }));
-
-          console.log(
-            "무통장입금 대기 상태로 설정됨 - 실제 입금 완료까지 대기"
-          );
-
-          // 무통장입금 상태 주기적 확인 시작 (30초마다)
-          const interval = setInterval(() => {
-            checkPaymentStatus(paymentKey);
-          }, 30000); // 30초마다 확인
-
-          setStatusCheckInterval(interval);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error("결제 정보 조회 실패:", errorData);
-
-        // 오류 발생 시에도 무통장입금 정보를 표시 (사용자 경험 개선)
-        console.log("오류 발생 - 임시 무통장입금 정보를 표시합니다.");
-
-        // 임시 가상계좌 정보 생성 (테스트용)
-        const tempVirtualAccount: VirtualAccountInfo = {
-          accountNumber: "123-456789-01-234",
-          bankCode: "088",
-          bankName: "신한은행",
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
-          amount: amount,
-          orderId: orderId,
-          customerName: "홍길동",
-        };
-        setVirtualAccountInfo(tempVirtualAccount);
-
-        // 대기 상태로 설정
-        setPaymentInfo((prev) => ({
-          ...prev!,
-          status: "WAITING_FOR_DEPOSIT",
-        }));
-
-        console.log("임시 무통장입금 정보 설정 완료");
-      }
-    } catch (error) {
-      console.error("결제 정보 조회 오류:", error);
-
-      // 오류 발생 시에도 무통장입금 정보를 표시
-      console.log("오류 발생 - 무통장입금 정보를 표시합니다.");
-
-      const tempVirtualAccount: VirtualAccountInfo = {
-        accountNumber: "123-456789-01-234",
-        bankCode: "088",
-        bankName: "신한은행",
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        amount: amount,
-        orderId: orderId,
-        customerName: "홍길동",
-      };
-      setVirtualAccountInfo(tempVirtualAccount);
-
-      setPaymentInfo((prev) => ({
-        ...prev!,
-        status: "WAITING_FOR_DEPOSIT",
-      }));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const checkPaymentStatus = async (paymentKey: string) => {
-    try {
-      const response = await fetch(`/api/payments/status/${paymentKey}`);
-
-      if (response.ok) {
-        const data = await response.json();
-
-        console.log("결제 상태 확인:", {
-          status: data.status,
-          method: data.method,
-          orderId: data.orderId,
-        });
-
-        // 무통장입금이 완료된 경우에만 상태 변경
-        if (
-          data.method === "VIRTUAL_ACCOUNT" &&
-          data.status === "DONE" &&
-          paymentInfo
-        ) {
-          console.log("무통장입금 완료! 상태를 DONE으로 변경");
-          setPaymentInfo({
-            ...paymentInfo,
-            status: "DONE",
           });
 
-          // 상태 확인 인터벌 중지
-          if (statusCheckInterval) {
-            clearInterval(statusCheckInterval);
-            setStatusCheckInterval(null);
+          // 무통장입금이 완료된 경우에만 상태 변경
+          if (
+            data.method === "VIRTUAL_ACCOUNT" &&
+            data.status === "DONE" &&
+            paymentInfo
+          ) {
+            console.log("무통장입금 완료! 상태를 DONE으로 변경");
+            setPaymentInfo({
+              ...paymentInfo,
+              status: "DONE",
+            });
+
+            // 상태 확인 인터벌 중지
+            if (statusCheckInterval) {
+              clearInterval(statusCheckInterval);
+              setStatusCheckInterval(null);
+            }
+          } else if (
+            data.method === "VIRTUAL_ACCOUNT" &&
+            data.status === "WAITING_FOR_DEPOSIT"
+          ) {
+            console.log("무통장입금 대기 중 - 계속 대기");
+          } else {
+            console.log("다른 결제 수단 또는 상태:", data.method, data.status);
           }
-        } else if (
-          data.method === "VIRTUAL_ACCOUNT" &&
-          data.status === "WAITING_FOR_DEPOSIT"
-        ) {
-          console.log("무통장입금 대기 중 - 계속 대기");
-        } else {
-          console.log("다른 결제 수단 또는 상태:", data.method, data.status);
         }
+      } catch (error) {
+        console.error("결제 상태 확인 오류:", error);
       }
-    } catch (error) {
-      console.error("결제 상태 확인 오류:", error);
-    }
-  };
+    },
+    [paymentInfo, statusCheckInterval]
+  );
 
   const getBankName = (bankCode: string): string => {
     const bankNames: { [key: string]: string } = {
@@ -355,7 +311,6 @@ export default function PaymentSuccessPage() {
   const isVirtualAccount =
     paymentInfo?.method === "VIRTUAL_ACCOUNT" ||
     paymentInfo?.method === "가상계좌";
-  const isPaymentComplete = paymentInfo?.status === "DONE";
   const isWaitingForDeposit = paymentInfo?.status === "WAITING_FOR_DEPOSIT";
 
   if (isLoading) {
@@ -493,7 +448,7 @@ export default function PaymentSuccessPage() {
                   <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
                     <p className="text-sm text-orange-800 text-center">
                       🏦 위 계좌로 입금하신 후, 토스페이먼츠 개발자센터에서
-                      "입금처리" 버튼을 눌러주세요.
+                      &quot;입금처리&quot; 버튼을 눌러주세요.
                     </p>
                   </div>
                   <Link
