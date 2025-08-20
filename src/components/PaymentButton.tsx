@@ -16,6 +16,26 @@ interface PaymentButtonProps {
   onError?: (error: string) => void;
 }
 
+interface PaymentRequestData {
+  amount: {
+    currency: string;
+    value: number;
+  };
+  orderId: string;
+  orderName: string;
+  customerEmail: string;
+  customerName: string;
+  successUrl: string;
+  failUrl: string;
+  method?: string;
+  card?: {
+    useEscrow: boolean;
+    flowMode: string;
+    useCardPoint: boolean;
+    useAppCardOnly: boolean;
+  };
+}
+
 export function PaymentButton({
   amount,
   orderName,
@@ -26,7 +46,9 @@ export function PaymentButton({
   onError,
 }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [payment, setPayment] = useState<any>(null);
+  const [payment, setPayment] = useState<{
+    requestPayment: (data: PaymentRequestData) => Promise<void>;
+  } | null>(null);
 
   // 토스페이먼츠 SDK 초기화
   useEffect(() => {
@@ -42,7 +64,11 @@ export function PaymentButton({
           customerKey: ANONYMOUS,
         });
 
-        setPayment(paymentInstance);
+        setPayment(
+          paymentInstance as {
+            requestPayment: (data: PaymentRequestData) => Promise<void>;
+          }
+        );
       } catch (error) {
         console.error("토스페이먼츠 SDK 초기화 오류:", error);
         onError?.("토스페이먼츠 SDK 초기화에 실패했습니다.");
@@ -72,7 +98,7 @@ export function PaymentButton({
         .substring(2, 8)}`;
 
       // 결제 요청 데이터 구성
-      const paymentRequestData: any = {
+      const paymentRequestData: PaymentRequestData = {
         amount: {
           currency: "KRW",
           value: amount,
@@ -89,8 +115,6 @@ export function PaymentButton({
       if (selectedMethods.includes("VIRTUAL_ACCOUNT")) {
         // 무통장입금 선택된 경우
         paymentRequestData.method = "VIRTUAL_ACCOUNT";
-        // 무통장입금의 경우 별도 설정이 필요하지 않음
-        // customerName은 상위 레벨에서 이미 설정됨
       } else if (selectedMethods.includes("CARD")) {
         // 카드만 선택된 경우
         paymentRequestData.method = "CARD";
@@ -126,7 +150,7 @@ export function PaymentButton({
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === "object" && error !== null) {
-        const errorObj = error as any;
+        const errorObj = error as { message?: string };
         errorMessage = errorObj.message || errorMessage;
       }
 
