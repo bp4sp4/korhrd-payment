@@ -1,0 +1,231 @@
+.content {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 6.25rem;
+}
+
+.title {
+    font-size: 54px;
+    line-height: 74px;
+    font-weight: 700;
+    color: #1e1e1e;
+    font-family: 'SUIT-Bold', sans-serif;
+    letter-spacing: -0.025em;
+    margin-bottom: 88px;
+    padding: 0;
+}
+
+
+.mainImage {
+    width: 1200px;
+    height: 740px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.description {
+    font-size: 26px;
+    margin-top: 40px;
+    line-height: 39px;
+    color: #1e1e1e;
+    font-family: 'SUIT-Regular', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+.subTitleWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.subTitle {
+    font-size: 20px;
+    text-align: center;
+    line-height: 39px;
+    color: #1e1e1e;
+    font-family: 'SUIT-Regular', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-top: 120px;
+}
+
+.subTitleDescription {
+    font-size: 42px;
+    text-align: center;
+    line-height: 57px;
+    color: #1e1e1e;
+    font-family: 'SUIT-Regular', sans-serif;
+    font-weight: 700;
+    margin: 0
+}
+
+.subTitleDescription2 {
+    font-size: 18px;
+    text-align: center;
+    color: #1e1e1e;
+    line-height: 30px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .content {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .description {
+        font-size: 1rem;
+    }
+
+    .mainImage {
+        width: 300px;
+        height: 225px;
+    }
+}
+
+@media (max-width: 640px) {
+    .content {
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .description {
+        font-size: 0.875rem;
+    }
+
+    .mainImage {
+        width: 250px;
+        height: 187px;
+    }
+}
+
+/* CTA 섹션 스타일 */
+.ctaSection {
+    margin-top: 120px;
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 24px;
+    text-align: center;
+}
+
+.ctaContent {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.ctaTitle {
+    font-size: 48px;
+    font-weight: 700;
+    color: #1e1e1e;
+    font-family: 'SUIT-Bold', sans-serif;
+    margin-bottom: 24px;
+    letter-spacing: -0.025em;
+}
+
+.ctaDescription {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #6b7280;
+    font-family: 'SUIT-Regular', sans-serif;
+    margin-bottom: 48px;
+}
+
+.ctaButtons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.ctaButtonPrimary {
+    background: #1e1e1e;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'SUIT-Medium', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid #1e1e1e;
+}
+
+.ctaButtonPrimary:hover {
+    background: white;
+    color: #1e1e1e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(30, 30, 30, 0.15);
+}
+
+.ctaButtonSecondary {
+    background: white;
+    color: #1e1e1e;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'SUIT-Medium', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid #e5e7eb;
+}
+
+.ctaButtonSecondary:hover {
+    background: #f9fafb;
+    border-color: #1e1e1e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* CTA 반응형 */
+@media (max-width: 768px) {
+    .ctaSection {
+        margin-top: 80px;
+        padding: 60px 0;
+    }
+
+    .ctaTitle {
+        font-size: 36px;
+    }
+
+    .ctaDescription {
+        font-size: 18px;
+    }
+
+    .ctaButtons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ctaButtonPrimary,
+    .ctaButtonSecondary {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .ctaSection {
+        margin-top: 60px;
+        padding: 40px 0;
+    }
+
+    .ctaTitle {
+        font-size: 28px;
+    }
+
+    .ctaDescription {
+        font-size: 16px;
+    }
+}
