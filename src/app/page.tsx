@@ -18,16 +18,12 @@ export default function Home() {
       {/* 인기 과정 */}
       <div className={styles.popularSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>인기 과정</h2>
+          <h2 className={styles.sectionTitle}>결제 과정</h2>
         </div>
         <div className={styles.courseGrid}>
-          <Link
-            href="/payment/checkout?type=practice"
-            className={styles.courseCard}
-          >
+          <Link href="/payment?type=practice" className={styles.courseCard}>
             <div className={styles.courseImage}>
               <img src="/images/course1.png" alt="실습섭외책임비" />
-              <div className={styles.courseBadge}>인기</div>
             </div>
             <div className={styles.courseInfo}>
               <h3 className={styles.courseTitle}>실습섭외책임비</h3>
@@ -35,7 +31,7 @@ export default function Home() {
                 실습 과정 중 발생하는 책임비용
               </p>
               <div className={styles.coursePrice}>
-                <span className={styles.discountPrice}>₩50,000</span>
+                <button className={styles.paymentButton}>결제하러가기</button>
               </div>
             </div>
           </Link>
@@ -45,7 +41,6 @@ export default function Home() {
           >
             <div className={styles.courseImage}>
               <img src="/images/course2.png" alt="취업자격증 발급비" />
-              <div className={styles.courseBadge}>신규</div>
             </div>
             <div className={styles.courseInfo}>
               <h3 className={styles.courseTitle}>취업자격증 발급비</h3>
@@ -53,7 +48,7 @@ export default function Home() {
                 취업에 필요한 자격증 발급 비용
               </p>
               <div className={styles.coursePrice}>
-                <span className={styles.discountPrice}>₩30,000</span>
+                <button className={styles.paymentButton}>결제하러가기</button>
               </div>
             </div>
           </Link>

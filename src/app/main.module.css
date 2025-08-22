@@ -3,10 +3,14 @@
     max-width: 560px;
     margin: 0 auto;
     min-height: 100%;
-    padding-top: 60px;
+
     /* 헤더 높이만큼 여백 */
 }
 
+/* Link 컴포넌트에서 언더라인 제거 */
+.courseCard {
+    text-decoration: none;
+}
 
 .bannerContent {
     position: relative;
@@ -141,7 +145,7 @@
 .popularSection {
     background: white;
     padding: 24px 20px;
-    margin: 16px 0;
+
 }
 
 .sectionHeader {
@@ -184,10 +188,6 @@
     border: 1px solid #e9ecef;
 }
 
-.courseCard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
 .courseImage {
     position: relative;
@@ -240,6 +240,27 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.paymentButton {
+    background: #2B7FFF;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'SUIT-Medium', sans-serif;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(43, 127, 255, 0.3);
+}
+
+.paymentButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 127, 255, 0.4);
+    background: #1a6be6;
 }
 
 .originalPrice {

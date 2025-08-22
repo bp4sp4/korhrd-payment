@@ -1,0 +1,84 @@
+.footer {
+    background: #fff;
+    width: 560px;
+    margin: 0 auto;
+    margin-top: auto;
+    padding: 20px 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 중간 섹션 */
+.middleSection {
+    text-align: left;
+    padding: 20px 0;
+
+
+}
+
+.companyName {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    font-family: 'SUIT-Medium', sans-serif;
+}
+
+/* 하단 섹션 */
+.bottomSection {
+    text-align: left;
+}
+
+.businessInfo,
+.address,
+.legalLinks,
+.copyright {
+    font-size: 12px;
+    color: #9ca3af;
+    margin: 0 0 8px 0;
+    font-family: 'SUIT-Regular', sans-serif;
+    line-height: 1.5;
+}
+
+.legalLinks {
+    margin: 16px 0 8px 0;
+}
+
+.legalLinks a {
+    color: #6b7280;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+.legalLinks a:hover {
+    color: #1f2937;
+}
+
+.copyright {
+    margin-top: 16px;
+    color: #9ca3af;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .companyName {
+        font-size: 16px;
+    }
+
+    .businessInfo,
+    .address,
+    .legalLinks,
+    .copyright {
+        font-size: 11px;
+    }
+}

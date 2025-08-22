@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import styles from "./payment.module.css";
 
 export default function PaymentPage() {
   const [selectedType, setSelectedType] = useState("");
+  const searchParams = useSearchParams();
+  const paymentType = searchParams.get("type");
 
   const courseOptions = [
     {
       id: "student",
-      title: "우리 학생",
+      title: "한평생교육원 전용",
       price: 10000,
-      description: "한평생교육 재학생/졸업생",
-      benefits: ["우리 학생 전용 할인", "추가 혜택 제공", "전용 커뮤니티 접근"],
+      description: "한평생교육원 학생",
+      benefits: ["한평생교육원 학생 전용 할인"],
       color: "#28a745",
     },
     {
@@ -37,6 +40,20 @@ export default function PaymentPage() {
     }
   };
 
+  const getPageTitle = () => {
+    if (paymentType === "practice") {
+      return "실습섭외책임비";
+    }
+    return "수강 신청";
+  };
+
+  const getPageDescription = () => {
+    if (paymentType === "practice") {
+      return "학생 유형에 따라 실습섭외책임비가 다릅니다";
+    }
+    return "학생 유형에 따라 수강료와 혜택이 다릅니다";
+  };
+
   return (
     <div className={styles.container}>
       {/* 헤더 */}
@@ -44,16 +61,14 @@ export default function PaymentPage() {
         <Link href="/" className={styles.backButton}>
           ←
         </Link>
-        <h1 className={styles.headerTitle}>수강 신청</h1>
+        <h1 className={styles.headerTitle}>{getPageTitle()}</h1>
         <div className={styles.headerSpacer}></div>
       </header>
 
       {/* 안내 메시지 */}
       <div className={styles.infoSection}>
-        <h2 className={styles.infoTitle}>수강 유형을 선택해주세요</h2>
-        <p className={styles.infoDescription}>
-          학생 유형에 따라 수강료와 혜택이 다릅니다
-        </p>
+        <h2 className={styles.infoTitle}>결제 유형을 선택해주세요</h2>
+        <p className={styles.infoDescription}>{getPageDescription()}</p>
       </div>
 
       {/* 선택 옵션 */}
@@ -75,7 +90,12 @@ export default function PaymentPage() {
                 <span className={styles.priceAmount}>
                   ₩{option.price.toLocaleString()}
                 </span>
-                <span className={styles.priceUnit}>/월</span>
+                {paymentType === "practice" && (
+                  <span className={styles.priceUnit}>/회</span>
+                )}
+                {paymentType !== "practice" && (
+                  <span className={styles.priceUnit}>/월</span>
+                )}
               </div>
             </div>
 

@@ -2,26 +2,29 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "한평생 결제 사이트",
-  description: "한평생 결제 사이트입니다",
+  title: "한평생 페이먼츠",
+  description: "한평생교육그룹 결제 시스템",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ko">
+      <head>
+        <script src="https://js.tosspayments.com/v2/standard"></script>
+      </head>
       <body className={inter.className}>
-        <div className="relative">
-          <Header />
-          <main className="pt-0">{children}</main>
-        </div>
+        <Header />
+        <main style={{ flex: 1 }}>{children}</main>
+        <Footer />
       </body>
     </html>
   );

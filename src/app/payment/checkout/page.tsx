@@ -1,32 +1,9 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./checkout.module.css";
-
-// TossPayments 타입 정의
-interface TossPayments {
-  requestPayment: (
-    method: string,
-    options: {
-      amount: number;
-      orderId: string;
-      orderName: string;
-      customerName: string;
-      customerEmail: string;
-      successUrl: string;
-      failUrl: string;
-    }
-  ) => Promise<void>;
-}
-
-// Window 인터페이스 확장
-declare global {
-  interface Window {
-    TossPayments?: TossPayments;
-  }
-}
 
 // 로딩 컴포넌트
 function CheckoutLoading() {
@@ -50,64 +27,174 @@ function CheckoutLoading() {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
-
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("quick");
-  const [agreed, setAgreed] = useState(false);
+  const [isPaymentReady, setIsPaymentReady] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [loadingStep, setLoadingStep] = useState<string>("초기화");
+  const [domReady, setDomReady] = useState(false);
 
   const courseData = {
     student: {
-      title: "한평생교육 프리미엄 패키지 (우리 학생)",
+      title: "실습섭외책임비 (우리 학생)",
       instructor: "한평생교육",
-      originalPrice: 20000,
-      discountRate: 50,
-      finalPrice: 10000,
-      discountAmount: 10000,
+      price: 10000,
       type: "우리 학생",
     },
     external: {
-      title: "한평생교육 프리미엄 패키지 (외부 학생)",
+      title: "실습섭외책임비 (외부 학생)",
       instructor: "한평생교육",
-      originalPrice: 150000,
-      discountRate: 0,
-      finalPrice: 150000,
-      discountAmount: 0,
+      price: 150000,
       type: "외부 학생",
+    },
+    certificate: {
+      title: "취업자격증 발급비",
+      instructor: "한평생교육",
+      price: 30000,
+      type: "자격증 발급",
     },
   };
 
   const currentData =
     courseData[type as keyof typeof courseData] || courseData.external;
 
-  const paymentMethods = [
-    { id: "quick", name: "퀵계좌이체", icon: "🏦" },
-    { id: "card", name: "신용·체크카드", icon: "💳" },
-    { id: "kakao", name: "카카오페이", icon: "🟡" },
-    { id: "toss", name: "토스페이", icon: "🔵" },
-    { id: "virtual", name: "가상계좌", icon: "🏛️" },
-    { id: "corporate", name: "법인카드", icon: "🏢" },
-    { id: "apple", name: "애플페이", icon: "🍎" },
-  ];
+  // DOM 요소가 렌더링되었는지 확인
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let checkCount = 0;
+    const maxChecks = 50; // 최대 5초 대기
 
-  const handleTossPayment = () => {
-    if (!agreed) {
-      alert("약관에 동의해주세요.");
+    const checkDOM = () => {
+      checkCount++;
+      const paymentMethod = document.querySelector("#payment-method");
+      const agreement = document.querySelector("#agreement");
+
+      console.log(`DOM 확인 시도 ${checkCount}:`, {
+        paymentMethod: !!paymentMethod,
+        agreement: !!agreement,
+      });
+
+      if (paymentMethod && agreement) {
+        console.log("DOM 요소들이 준비되었습니다");
+        setDomReady(true);
+      } else if (checkCount >= maxChecks) {
+        console.error("DOM 요소 확인 타임아웃");
+        setPaymentError(
+          "페이지 로딩에 시간이 오래 걸립니다. 새로고침해주세요."
+        );
+      } else {
+        timeoutId = setTimeout(checkDOM, 100);
+      }
+    };
+
+    // 약간의 지연 후 DOM 확인 시작
+    timeoutId = setTimeout(checkDOM, 200);
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  // DOM이 준비되면 토스페이먼츠 위젯 초기화
+  useEffect(() => {
+    if (!domReady) return;
+
+    async function initializeTossPayments() {
+      try {
+        setLoadingStep("SDK 로드 중...");
+        console.log("토스페이먼츠 초기화 시작...");
+
+        const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
+        if (!clientKey) {
+          throw new Error("클라이언트 키가 설정되지 않았습니다.");
+        }
+
+        console.log(
+          "클라이언트 키 확인됨:",
+          clientKey.substring(0, 10) + "..."
+        );
+
+        // SDK 로드
+        setLoadingStep("SDK 다운로드 중...");
+        const { loadTossPayments, ANONYMOUS } = await import(
+          "@tosspayments/tosspayments-sdk"
+        );
+
+        setLoadingStep("토스페이먼츠 초기화 중...");
+        const tossPayments = await loadTossPayments(clientKey);
+
+        setLoadingStep("위젯 생성 중...");
+        const widgets = tossPayments.widgets({
+          customerKey: ANONYMOUS,
+        });
+
+        // 결제 금액 설정
+        setLoadingStep("결제 금액 설정 중...");
+        await widgets.setAmount({
+          currency: "KRW",
+          value: currentData.price,
+        });
+
+        console.log("결제 금액 설정 완료:", currentData.price);
+
+        // 위젯 렌더링
+        setLoadingStep("위젯 렌더링 중...");
+        await Promise.all([
+          widgets.renderPaymentMethods({
+            selector: "#payment-method",
+            variantKey: "DEFAULT",
+          }),
+          widgets.renderAgreement({
+            selector: "#agreement",
+            variantKey: "AGREEMENT",
+          }),
+        ]);
+
+        console.log("토스페이먼츠 위젯 렌더링 완료");
+        setLoadingStep("완료");
+        setIsPaymentReady(true);
+        setPaymentError(null);
+
+        // 결제 요청 함수를 전역으로 저장
+        (window as any).requestTossPayment = async () => {
+          try {
+            // 고객 정보를 명시적으로 제외하고 필수 파라미터만 전달
+            const paymentData = {
+              orderId: `order_${Date.now()}_${Math.random()
+                .toString(36)
+                .substr(2, 9)}`,
+              orderName: currentData.title,
+              successUrl: `${window.location.origin}/payment/success`,
+              failUrl: `${window.location.origin}/payment/fail`,
+            };
+
+            console.log("결제 요청 데이터:", paymentData);
+            await widgets.requestPayment(paymentData);
+          } catch (error) {
+            console.error("결제 요청 실패:", error);
+            alert("결제 요청에 실패했습니다. 다시 시도해주세요.");
+          }
+        };
+      } catch (error) {
+        console.error("토스페이먼츠 초기화 실패:", error);
+        setPaymentError(`토스페이먼츠 초기화에 실패했습니다: ${error}`);
+      }
+    }
+
+    initializeTossPayments();
+  }, [domReady, currentData.price]);
+
+  // 결제 요청
+  const handlePayment = async () => {
+    if (!isPaymentReady) {
+      alert("결제 시스템을 준비 중입니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
-    // 토스 결제 SDK 호출
-    if (typeof window !== "undefined" && window.TossPayments) {
-      window.TossPayments.requestPayment("카드", {
-        amount: currentData.finalPrice,
-        orderId: `order_${Date.now()}`,
-        orderName: currentData.title,
-        customerName: "홍길동",
-        customerEmail: "hong@example.com",
-        successUrl: `${window.location.origin}/payment/success`,
-        failUrl: `${window.location.origin}/payment/fail`,
-      });
+    if ((window as any).requestTossPayment) {
+      await (window as any).requestTossPayment();
     } else {
-      // 토스 SDK가 로드되지 않은 경우
-      alert("토스 결제를 준비 중입니다. 잠시 후 다시 시도해주세요.");
+      alert("결제 시스템이 준비되지 않았습니다.");
     }
   };
 
@@ -126,7 +213,9 @@ function CheckoutContent() {
       <div className={styles.productSection}>
         <div className={styles.productItem}>
           <div className={styles.productImage}>
-            <img src="/images/course_thumbnail.png" alt="교육 과정" />
+            <div className={styles.imagePlaceholder}>
+              <span>📚</span>
+            </div>
           </div>
           <div className={styles.productInfo}>
             <h3 className={styles.productTitle}>{currentData.title}</h3>
@@ -135,133 +224,80 @@ function CheckoutContent() {
               <span className={styles.typeBadge}>{currentData.type}</span>
             </div>
             <div className={styles.productPrice}>
-              {currentData.discountRate > 0 && (
-                <span className={styles.discountRate}>
-                  {currentData.discountRate}%
-                </span>
-              )}
-              <span className={styles.originalPrice}>
-                ₩{currentData.originalPrice.toLocaleString()}
-              </span>
               <span className={styles.finalPrice}>
-                ₩{currentData.finalPrice.toLocaleString()}
+                ₩{currentData.price.toLocaleString()}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 구매자 정보 */}
-      <div className={styles.buyerSection}>
-        <div className={styles.sectionHeader}>
-          <h3>구매자정보</h3>
-          <button className={styles.editButton}>수정</button>
-        </div>
-        <div className={styles.buyerInfo}>
-          <p>홍길동 (hong@example.com)</p>
-        </div>
-      </div>
-
-      {/* 쿠폰 */}
-      <div className={styles.couponSection}>
-        <div className={styles.sectionHeader}>
-          <h3>쿠폰</h3>
-        </div>
-        <div className={styles.couponInput}>
-          <input type="text" placeholder="₩0" readOnly />
-          <span className={styles.couponAvailable}>사용가능 0</span>
-        </div>
-        <button className={styles.couponButton}>쿠폰선택</button>
-      </div>
-
-      {/* 포인트 */}
-      <div className={styles.pointsSection}>
-        <div className={styles.sectionHeader}>
-          <h3>포인트</h3>
-        </div>
-        <div className={styles.pointsInput}>
-          <input type="text" placeholder="1,000원 이상 사용" readOnly />
-          <span className={styles.pointsAvailable}>보유 0</span>
-        </div>
-        <button className={styles.pointsButton}>전액사용</button>
-      </div>
-
-      {/* 결제 방법 */}
+      {/* 결제 방법 선택 */}
       <div className={styles.paymentMethodSection}>
-        <div className={styles.sectionHeader}>
-          <h3>결제 방법</h3>
-        </div>
-        <div className={styles.paymentOptions}>
-          {paymentMethods.map((method) => (
-            <button
-              key={method.id}
-              className={`${styles.paymentOption} ${
-                selectedPaymentMethod === method.id ? styles.selected : ""
-              }`}
-              onClick={() => setSelectedPaymentMethod(method.id)}
-            >
-              <span className={styles.paymentIcon}>{method.icon}</span>
-              <span className={styles.paymentName}>{method.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 결제 금액 요약 */}
-      <div className={styles.summarySection}>
-        <div className={styles.summaryItem}>
-          <span>선택상품금액</span>
-          <span>₩{currentData.originalPrice.toLocaleString()}</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span>할인 금액</span>
-          <span>-₩{currentData.discountAmount.toLocaleString()}</span>
-        </div>
-        <div className={styles.summaryTotal}>
-          <span>총 결제 금액</span>
-          <span>₩{currentData.finalPrice.toLocaleString()}</span>
+        <h3>결제 방법</h3>
+        <div id="payment-method" className={styles.paymentWidget}>
+          {paymentError ? (
+            <div className={styles.errorMessage}>
+              <p>{paymentError}</p>
+              <button
+                className={styles.retryButton}
+                onClick={() => window.location.reload()}
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : !isPaymentReady ? (
+            <div className={styles.skeletonUI}>
+              <div className={styles.skeletonCard}>
+                <div className={styles.skeletonHeader}></div>
+                <div className={styles.skeletonContent}>
+                  <div className={styles.skeletonItem}></div>
+                  <div className={styles.skeletonItem}></div>
+                  <div className={styles.skeletonItem}></div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      {/* 약관 동의 */}
+      {/* 이용약관 */}
       <div className={styles.agreementSection}>
-        <label className={styles.agreementLabel}>
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className={styles.agreementCheckbox}
-          />
-          <span className={styles.agreementText}>
-            회원 본인은 주문내용을 확인했으며, 구매조건및 개인정보처리방침과
-            결제에 동의합니다.
-          </span>
-        </label>
+        <h3>이용약관</h3>
+        <div id="agreement" className={styles.agreementWidget}>
+          {paymentError ? (
+            <div className={styles.errorMessage}>
+              <p>{paymentError}</p>
+              <button
+                className={styles.retryButton}
+                onClick={() => window.location.reload()}
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : !isPaymentReady ? (
+            <div className={styles.skeletonUI}>
+              <div className={styles.skeletonCard}>
+                <div className={styles.skeletonHeader}></div>
+                <div className={styles.skeletonContent}>
+                  <div className={styles.skeletonItem}></div>
+                  <div className={styles.skeletonItem}></div>
+                  <div className={styles.skeletonItem}></div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      {/* 하단 고정 결제 버튼 */}
-      <div className={styles.stickyPaymentBar}>
-        <div className={styles.paymentInfo}>
-          <span>총 결제 금액</span>
-          <div className={styles.paymentAmount}>
-            <span className={styles.originalAmount}>
-              ₩{currentData.originalPrice.toLocaleString()}
-            </span>
-            <span className={styles.finalAmount}>
-              ₩{currentData.finalPrice.toLocaleString()}
-            </span>
-          </div>
-        </div>
-        <div className={styles.paymentButtons}>
-          <button
-            className={styles.tossButton}
-            onClick={handleTossPayment}
-            disabled={!agreed}
-          >
-            <span className={styles.tossText}>토스로 결제하기</span>
+      {/* 결제 버튼 */}
+      {isPaymentReady && !paymentError && (
+        <div className={styles.paymentButtonSection}>
+          <button className={styles.paymentButton} onClick={handlePayment}>
+            결제하기
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
