@@ -7,7 +7,11 @@ import styles from "./success.module.css";
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
-  const [paymentInfo, setPaymentInfo] = useState<any>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{
+    paymentKey: string;
+    orderId: string;
+    amount: number;
+  } | null>(null);
 
   useEffect(() => {
     // URL 파라미터에서 결제 정보 추출
