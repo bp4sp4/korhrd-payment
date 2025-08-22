@@ -10,7 +10,20 @@
 /* Link 컴포넌트에서 언더라인 제거 */
 .courseCard {
     text-decoration: none;
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    z-index: 5;
 }
+
 
 .bannerContent {
     position: relative;
@@ -52,10 +65,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.primaryButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
+
 
 .secondaryButton {
     background: transparent;
@@ -262,19 +272,17 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    min-height: 44px;
+    min-height: 48px;
     touch-action: manipulation;
     text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 10;
 }
 
-.paymentButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(43, 127, 255, 0.4);
-    background: #1a6be6;
-}
+
 
 .originalPrice {
     font-size: 14px;
