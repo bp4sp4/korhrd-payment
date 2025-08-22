@@ -1,9 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./checkout.module.css";
+
+// TossPayments 타입 정의
+interface TossPayments {
+  requestPayment: (
+    method: string,
+    options: {
+      amount: number;
+      orderId: string;
+      orderName: string;
+      customerName: string;
+      customerEmail: string;
+      successUrl: string;
+      failUrl: string;
+    }
+  ) => Promise<void>;
+}
+
+// Window 인터페이스 확장
+declare global {
+  interface Window {
+    TossPayments?: TossPayments;
+  }
+}
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
@@ -53,8 +76,8 @@ export default function CheckoutPage() {
     }
 
     // 토스 결제 SDK 호출
-    if (typeof window !== "undefined" && (window as any).TossPayments) {
-      (window as any).TossPayments.requestPayment("카드", {
+    if (typeof window !== "undefined" && window.TossPayments) {
+      window.TossPayments.requestPayment("카드", {
         amount: currentData.finalPrice,
         orderId: `order_${Date.now()}`,
         orderName: currentData.title,
