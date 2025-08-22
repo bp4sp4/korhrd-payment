@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./checkout.module.css";
@@ -28,7 +28,26 @@ declare global {
   }
 }
 
-export default function CheckoutPage() {
+// 로딩 컴포넌트
+function CheckoutLoading() {
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <Link href="/payment" className={styles.backButton}>
+          ←
+        </Link>
+        <h1 className={styles.headerTitle}>수강바구니</h1>
+        <div className={styles.headerSpacer}></div>
+      </header>
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <p>로딩 중...</p>
+      </div>
+    </div>
+  );
+}
+
+// 메인 체크아웃 컴포넌트
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 
@@ -244,5 +263,14 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
