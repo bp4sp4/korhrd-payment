@@ -75,12 +75,12 @@
     color: #1f2937;
 }
 
-.navLink:first-child {
+.navLink.active {
     color: #1f2937;
     font-weight: 600;
 }
 
-.navLink:first-child::after {
+.navLink.active::after {
     content: '';
     position: absolute;
     bottom: 0;

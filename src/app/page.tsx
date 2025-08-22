@@ -35,10 +35,7 @@ export default function Home() {
               </div>
             </div>
           </Link>
-          <Link
-            href="/payment/checkout?type=certificate"
-            className={styles.courseCard}
-          >
+          <Link href="/payment/certificate" className={styles.courseCard}>
             <div className={styles.courseImage}>
               <img src="/images/course2.png" alt="취업자격증 발급비" />
             </div>

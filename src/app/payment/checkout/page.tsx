@@ -10,9 +10,13 @@ function CheckoutLoading() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <Link href="/payment" className={styles.backButton}>
+        <button
+          onClick={() => (window.location.href = "/")}
+          className={styles.backButton}
+          style={{ background: "none", border: "none", cursor: "pointer" }}
+        >
           ←
-        </Link>
+        </button>
         <h1 className={styles.headerTitle}>수강바구니</h1>
         <div className={styles.headerSpacer}></div>
       </header>
@@ -52,8 +56,30 @@ function CheckoutContent() {
     },
   };
 
-  const currentData =
-    courseData[type as keyof typeof courseData] || courseData.external;
+  // URL 파라미터에서 amount 가져오기
+  const amountParam = searchParams.get("amount");
+
+  let currentData: {
+    title: string;
+    instructor: string;
+    price: number;
+    type: string;
+  };
+
+  if (type === "certificate" && amountParam) {
+    // 자격증 발급비인 경우 동적 금액 설정
+    const amount = parseInt(amountParam);
+    currentData = {
+      title: `취업자격증 발급비 (${(amount / 10000).toLocaleString()}만원)`,
+      instructor: "한평생교육",
+      price: amount,
+      type: "자격증 발급",
+    };
+  } else {
+    // 기존 로직
+    currentData =
+      courseData[type as keyof typeof courseData] || courseData.external;
+  }
 
   // DOM 요소가 렌더링되었는지 확인
   useEffect(() => {
@@ -197,9 +223,20 @@ function CheckoutContent() {
     <div className={styles.container}>
       {/* 헤더 */}
       <header className={styles.header}>
-        <Link href="/payment" className={styles.backButton}>
+        <button
+          onClick={() => {
+            // certificate 타입인 경우 금액 선택 페이지로, 그 외에는 실습결제 페이지로
+            if (type === "certificate") {
+              window.location.href = "/payment/certificate";
+            } else {
+              window.location.href = "/payment";
+            }
+          }}
+          className={styles.backButton}
+          style={{ background: "none", border: "none", cursor: "pointer" }}
+        >
           ←
-        </Link>
+        </button>
         <h1 className={styles.headerTitle}>수강바구니</h1>
         <div className={styles.headerSpacer}></div>
       </header>

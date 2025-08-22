@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./header.module.css";
 import Link from "next/link";
 
 export default function Header() {
-  const navItems = [
-    { name: "실습결제", link: "/payment" },
-    { name: "민간결제", link: "/payment" },
-    { name: "자주묻는 질문", link: "/faq" },
-  ];
+  const pathname = usePathname();
+  const [navItems, setNavItems] = useState<
+    Array<{ name: string; link: string }>
+  >([]);
+
+  useEffect(() => {
+    // 항상 두 메뉴 모두 표시
+    setNavItems([
+      { name: "실습결제", link: "/payment" },
+      { name: "민간결제", link: "/payment/certificate" },
+    ]);
+  }, [pathname]);
 
   return (
     <header className={styles.header}>
@@ -27,15 +35,32 @@ export default function Header() {
         </div>
 
         {/* 가로 네비게이션 메뉴 */}
-        <nav className={styles.navigation}>
-          <div className={styles.navContainer}>
-            {navItems.map((item) => (
-              <Link key={item.name} href={item.link} className={styles.navLink}>
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        </nav>
+        {navItems.length > 0 && (
+          <nav className={styles.navigation}>
+            <div className={styles.navContainer}>
+              {navItems.map((item) => {
+                const isActive =
+                  (item.name === "실습결제" &&
+                    pathname.startsWith("/payment") &&
+                    !pathname.startsWith("/payment/certificate")) ||
+                  (item.name === "민간결제" &&
+                    pathname.startsWith("/payment/certificate"));
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.link}
+                    className={`${styles.navLink} ${
+                      isActive ? styles.active : ""
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );
