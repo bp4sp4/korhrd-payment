@@ -6,7 +6,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
+    background: #fff;
 }
 
 .successCard {
@@ -27,7 +27,7 @@
 .successTitle {
     font-size: 24px;
     font-weight: 600;
-    color: #28a745;
+    color: #2B7FFF;
     margin: 0 0 12px 0;
     font-family: 'SUIT-Medium', sans-serif;
 }

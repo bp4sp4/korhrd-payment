@@ -48,9 +48,10 @@ function PaymentSuccessContent() {
   return (
     <div className={styles.container}>
       <div className={styles.successCard}>
-        <div className={styles.successIcon}>✅</div>
         <h1 className={styles.successTitle}>결제가 완료되었습니다!</h1>
-        <p className={styles.successMessage}>안전하게 결제가 처리되었습니다.</p>
+        <p className={styles.successMessage}>
+          담당자가 빠르게 확인하여 연락드리겠습니다..
+        </p>
 
         {paymentInfo && (
           <div className={styles.paymentDetails}>

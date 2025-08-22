@@ -81,43 +81,9 @@ function CheckoutContent() {
       courseData[type as keyof typeof courseData] || courseData.external;
   }
 
-  // DOM 요소가 렌더링되었는지 확인
+  // DOM 준비 완료
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let checkCount = 0;
-    const maxChecks = 50; // 최대 5초 대기
-
-    const checkDOM = () => {
-      checkCount++;
-      const paymentMethod = document.querySelector("#payment-method");
-      const agreement = document.querySelector("#agreement");
-
-      console.log(`DOM 확인 시도 ${checkCount}:`, {
-        paymentMethod: !!paymentMethod,
-        agreement: !!agreement,
-      });
-
-      if (paymentMethod && agreement) {
-        console.log("DOM 요소들이 준비되었습니다");
-        setDomReady(true);
-      } else if (checkCount >= maxChecks) {
-        console.error("DOM 요소 확인 타임아웃");
-        setPaymentError(
-          "페이지 로딩에 시간이 오래 걸립니다. 새로고침해주세요."
-        );
-      } else {
-        timeoutId = setTimeout(checkDOM, 100);
-      }
-    };
-
-    // 약간의 지연 후 DOM 확인 시작
-    timeoutId = setTimeout(checkDOM, 200);
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    setDomReady(true);
   }, []);
 
   // DOM이 준비되면 토스페이먼츠 위젯 초기화
@@ -133,18 +99,12 @@ function CheckoutContent() {
           throw new Error("클라이언트 키가 설정되지 않았습니다.");
         }
 
-        console.log(
-          "클라이언트 키 확인됨:",
-          clientKey.substring(0, 10) + "..."
-        );
-
         // SDK 로드
         const { loadTossPayments, ANONYMOUS } = await import(
           "@tosspayments/tosspayments-sdk"
         );
 
         const tossPayments = await loadTossPayments(clientKey);
-
         const widgets = tossPayments.widgets({
           customerKey: ANONYMOUS,
         });
@@ -158,16 +118,15 @@ function CheckoutContent() {
         console.log("결제 금액 설정 완료:", currentData.price);
 
         // 위젯 렌더링
-        await Promise.all([
-          widgets.renderPaymentMethods({
-            selector: "#payment-method",
-            variantKey: "DEFAULT",
-          }),
-          widgets.renderAgreement({
-            selector: "#agreement",
-            variantKey: "AGREEMENT",
-          }),
-        ]);
+        await widgets.renderPaymentMethods({
+          selector: "#payment-method",
+          variantKey: "DEFAULT",
+        });
+
+        await widgets.renderAgreement({
+          selector: "#agreement",
+          variantKey: "AGREEMENT",
+        });
 
         console.log("토스페이먼츠 위젯 렌더링 완료");
         setIsPaymentReady(true);
@@ -177,7 +136,6 @@ function CheckoutContent() {
         (window as unknown as Record<string, unknown>).requestTossPayment =
           async () => {
             try {
-              // 고객 정보를 명시적으로 제외하고 필수 파라미터만 전달
               const paymentData = {
                 orderId: `order_${Date.now()}_${Math.random()
                   .toString(36)
@@ -191,7 +149,6 @@ function CheckoutContent() {
               await widgets.requestPayment(paymentData);
             } catch (error) {
               console.error("결제 요청 실패:", error);
-              alert("결제 요청에 실패했습니다. 다시 시도해주세요.");
             }
           };
       } catch (error) {
@@ -206,7 +163,7 @@ function CheckoutContent() {
   // 결제 요청
   const handlePayment = async () => {
     if (!isPaymentReady) {
-      alert("결제 시스템을 준비 중입니다. 잠시 후 다시 시도해주세요.");
+      console.log("결제 시스템을 준비 중입니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
@@ -215,7 +172,7 @@ function CheckoutContent() {
     if (requestPayment) {
       await requestPayment();
     } else {
-      alert("결제 시스템이 준비되지 않았습니다.");
+      console.log("결제 시스템이 준비되지 않았습니다.");
     }
   };
 

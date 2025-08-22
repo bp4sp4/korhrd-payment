@@ -3,9 +3,7 @@
     max-width: 560px;
     margin: 0 auto;
     background: #f8f9fa;
-
     position: relative;
-
 }
 
 /* 헤더 */
@@ -54,7 +52,6 @@
     background: white;
     padding: 20px;
     border-radius: 0;
-
 }
 
 /* 상품 정보 */
@@ -99,6 +96,7 @@
 
 .productInfo {
     flex: 1;
+    min-width: 0;
 }
 
 .productTitle {
@@ -259,18 +257,6 @@
     animation: shimmer 1.5s infinite;
 }
 
-.skeletonItem:nth-child(1) {
-    width: 80%;
-}
-
-.skeletonItem:nth-child(2) {
-    width: 60%;
-}
-
-.skeletonItem:nth-child(3) {
-    width: 70%;
-}
-
 @keyframes shimmer {
     0% {
         background-position: -200% 0;
@@ -282,10 +268,20 @@
 }
 
 /* 결제 버튼 */
+.paymentButtonSection {
+    position: sticky;
+    bottom: 0;
+    background: white;
+
+    padding: 20px;
+    z-index: 100;
+}
+
 .paymentButton {
     width: 100%;
     background: #0064ff;
     color: white;
+    border: none;
     padding: 16px;
     border-radius: 8px;
     font-size: 16px;
@@ -293,32 +289,25 @@
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'SUIT-Medium', sans-serif;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
 }
 
-.paymentButton:hover:not(:disabled) {
+.paymentButton:hover {
     background: #0052cc;
 }
 
-.paymentButton:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
+.paymentButton:active {
+    transform: translateY(1px);
 }
 
 /* 반응형 디자인 */
-@media (max-width: 480px) {
-    .container {
-        padding-bottom: 20px;
+@media (min-width: 481px) {
+
+
+    .header {
+        border-radius: 12px 12px 0 0;
     }
 
-    .productSection,
-    .paymentMethodSection,
-    .agreementSection,
     .paymentButtonSection {
-        padding: 16px;
+        border-radius: 0 0 12px 12px;
     }
 }

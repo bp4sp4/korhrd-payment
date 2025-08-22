@@ -72,7 +72,7 @@ function PaymentContent() {
     if (paymentType === "practice") {
       return "실습섭외책임비";
     }
-    return "수강 신청";
+    return "실습섭외책임비";
   };
 
   const getPageDescription = () => {
@@ -108,8 +108,7 @@ function PaymentContent() {
               selectedType === option.id ? styles.selected : ""
             }`}
             onClick={() => handleSelection(option.id)}
-            onTouchStart={(e) => e.preventDefault()}
-            onTouchEnd={(e) => e.preventDefault()}
+            onTouchStart={() => handleSelection(option.id)}
           >
             <div className={styles.optionHeader}>
               <div className={styles.optionTitle}>
@@ -156,7 +155,7 @@ function PaymentContent() {
           onClick={handleContinue}
           disabled={!selectedType}
         >
-          {selectedType ? "다음 단계로" : "수강 유형을 선택해주세요"}
+          {selectedType ? "다음 단계로" : "결제 유형을 선택해주세요"}
         </button>
       </div>
     </div>

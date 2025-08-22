@@ -5,6 +5,8 @@
     background: #f8f9fa;
     position: relative;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 헤더 */
@@ -12,11 +14,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 12px 20px;
     background: white;
-    border-bottom: 1px solid #e9ecef;
-    position: sticky;
-    top: 0;
+
+    position: relative;
     z-index: 100;
 }
 
@@ -50,19 +51,19 @@
 .optionsSection,
 .stickyButtonBar {
     background: white;
-    padding: 20px;
+    padding: 16px 20px;
     border-radius: 0;
 }
 
 .infoSection {
-    border-bottom: 1px solid #e9ecef;
+    padding: 24px 20px;
 }
 
 .infoTitle {
     font-size: 20px;
     font-weight: 600;
     color: #212529;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     font-family: 'SUIT-Medium', sans-serif;
 }
 
@@ -70,21 +71,22 @@
     font-size: 14px;
     color: #6c757d;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
     font-family: 'SUIT-Regular', sans-serif;
 }
 
 /* 옵션 카드 */
 .optionsSection {
     padding: 0;
+    flex: 1;
 }
 
 .optionCard {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
-    padding: 20px;
-    margin: 16px 20px;
+    padding: 16px;
+    margin: 0px 20px 4px 20px;
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -142,14 +144,14 @@
 }
 
 .optionBenefits {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .optionBenefits h4 {
     font-size: 14px;
     font-weight: 600;
     color: #495057;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     font-family: 'SUIT-Medium', sans-serif;
 }
 
@@ -162,7 +164,7 @@
 .optionBenefits li {
     font-size: 13px;
     color: #6c757d;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     padding-left: 16px;
     position: relative;
     font-family: 'SUIT-Regular', sans-serif;
