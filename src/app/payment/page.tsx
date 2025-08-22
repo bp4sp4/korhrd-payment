@@ -1,11 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./payment.module.css";
 
+// 로딩 컴포넌트
+function PaymentLoading() {
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <Link href="/" className={styles.backButton}>
+          ←
+        </Link>
+        <h1 className={styles.headerTitle}>수강 신청</h1>
+        <div className={styles.headerSpacer}></div>
+      </header>
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <p>로딩 중...</p>
+      </div>
+    </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
 export default function PaymentPage() {
+  return (
+    <Suspense fallback={<PaymentLoading />}>
+      <PaymentContent />
+    </Suspense>
+  );
+}
+
+// 메인 컴포넌트
+function PaymentContent() {
   const [selectedType, setSelectedType] = useState("");
   const searchParams = useSearchParams();
   const paymentType = searchParams.get("type");
