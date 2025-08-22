@@ -365,13 +365,8 @@
 
 /* 반응형 디자인 */
 @media (max-width: 480px) {
-    .container {
-        padding-top: 60px;
-    }
 
-    .mainBanner {
-        padding: 32px 16px;
-    }
+
 
     .bannerTitle {
         font-size: 24px;
