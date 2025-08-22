@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./success.module.css";
 
-export default function PaymentSuccessPage() {
+// 로딩 컴포넌트
+function SuccessLoading() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.successCard}>
+        <div className={styles.successIcon}>✅</div>
+        <h1 className={styles.successTitle}>결제가 완료되었습니다!</h1>
+        <p className={styles.successMessage}>안전하게 결제가 처리되었습니다.</p>
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          <p>로딩 중...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 메인 컴포넌트
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const [paymentInfo, setPaymentInfo] = useState<{
     paymentKey: string;
@@ -55,5 +72,14 @@ export default function PaymentSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<SuccessLoading />}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
