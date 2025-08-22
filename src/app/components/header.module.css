@@ -87,7 +87,7 @@
     }
 
     .logoText {
-        font-size: 16px;
+        font-size: 20px;
     }
 
     .navContainer {
@@ -96,5 +96,11 @@
 
     .navLink {
         font-size: 13px;
+    }
+
+    .logoImage {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
     }
 }
