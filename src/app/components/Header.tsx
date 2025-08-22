@@ -38,26 +38,15 @@ export default function Header() {
         {navItems.length > 0 && (
           <nav className={styles.navigation}>
             <div className={styles.navContainer}>
-              {navItems.map((item) => {
-                const isActive =
-                  (item.name === "실습결제" &&
-                    pathname.startsWith("/payment") &&
-                    !pathname.startsWith("/payment/certificate")) ||
-                  (item.name === "민간결제" &&
-                    pathname.startsWith("/payment/certificate"));
-
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.link}
-                    className={`${styles.navLink} ${
-                      isActive ? styles.active : ""
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.link}
+                  className={styles.navLink}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </nav>
         )}

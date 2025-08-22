@@ -1,23 +1,63 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-
 @font-face {
-  font-family: 'SUIT-Regular';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
-  font-weight: normal;
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Thin.woff') format('woff');
+  font-weight: 100;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'SUIT-Medium';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Medium.woff2') format('woff2');
-  font-weight: normal;
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraLight.woff') format('woff');
+  font-weight: 200;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'SUIT-Bold';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Bold.woff2') format('woff2');
-  font-weight: normal;
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Black.woff') format('woff');
+  font-weight: 900;
   font-style: normal;
 }
 
@@ -31,7 +71,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: 'SUIT-Regular', sans-serif;
+  font-family: 'Pretendard', sans-serif;
   background-color: #f8f9fa;
   height: 100%;
 }
@@ -57,20 +97,53 @@ a {
 
 /* 기본 폰트 설정 */
 * {
-  font-family: 'SUIT-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
 }
 
 /* 폰트 웨이트 클래스 */
+.font-thin {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 100;
+}
+
+.font-extralight {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 200;
+}
+
+.font-light {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 300;
+}
+
 .font-regular {
-  font-family: 'SUIT-Regular', sans-serif;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 400;
 }
 
 .font-medium {
-  font-family: 'SUIT-Medium', sans-serif;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
 }
 
 .font-bold {
-  font-family: 'SUIT-Bold', sans-serif;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 800;
+}
+
+.font-black {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 900;
 }

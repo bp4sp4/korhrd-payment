@@ -108,6 +108,8 @@ function PaymentContent() {
               selectedType === option.id ? styles.selected : ""
             }`}
             onClick={() => handleSelection(option.id)}
+            onTouchStart={(e) => e.preventDefault()}
+            onTouchEnd={(e) => e.preventDefault()}
           >
             <div className={styles.optionHeader}>
               <div className={styles.optionTitle}>

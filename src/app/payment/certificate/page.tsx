@@ -101,6 +101,8 @@ function CertificateContent() {
               selectedAmount === option.amount ? styles.selected : ""
             }`}
             onClick={() => handleSelection(option.amount)}
+            onTouchStart={(e) => e.preventDefault()}
+            onTouchEnd={(e) => e.preventDefault()}
           >
             <div className={styles.optionHeader}>
               <div className={styles.optionTitle}>

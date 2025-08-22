@@ -31,20 +31,20 @@
 }
 
 .logoImage {
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
+    width: 23px;
+    height: 23px;
+    margin-right: 5px;
 }
 
 .logoText {
-    font-size: 18px;
+    font-size: 23px;
     font-weight: 600;
     color: #1f2937;
 }
 
 .navigation {
     flex: 1;
-    margin-left: 16px;
+    margin-left: 25px;
     overflow: hidden;
 }
 
@@ -75,20 +75,9 @@
     color: #1f2937;
 }
 
-.navLink.active {
-    color: #1f2937;
-    font-weight: 600;
-}
-
-.navLink.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #3b82f6;
-    border-radius: 1px;
+.navLink:hover {
+    background-color: #d9d9ff1c;
+    border-radius: 4px;
 }
 
 /* 모바일 최적화 */

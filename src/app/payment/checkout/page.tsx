@@ -17,7 +17,7 @@ function CheckoutLoading() {
         >
           ←
         </button>
-        <h1 className={styles.headerTitle}>수강바구니</h1>
+        <h1 className={styles.headerTitle}>결제진행</h1>
         <div className={styles.headerSpacer}></div>
       </header>
       <div style={{ padding: "20px", textAlign: "center" }}>
@@ -237,7 +237,7 @@ function CheckoutContent() {
         >
           ←
         </button>
-        <h1 className={styles.headerTitle}>수강바구니</h1>
+        <h1 className={styles.headerTitle}>결제진행</h1>
         <div className={styles.headerSpacer}></div>
       </header>
 
@@ -295,7 +295,6 @@ function CheckoutContent() {
 
       {/* 이용약관 */}
       <div className={styles.agreementSection}>
-        <h3>이용약관</h3>
         <div id="agreement" className={styles.agreementWidget}>
           {paymentError ? (
             <div className={styles.errorMessage}>

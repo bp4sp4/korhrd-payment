@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./main.module.css";
 import Link from "next/link";
 
@@ -31,7 +33,13 @@ export default function Home() {
                 실습 과정 중 발생하는 책임비용
               </p>
               <div className={styles.coursePrice}>
-                <button className={styles.paymentButton}>결제하러가기</button>
+                <button
+                  className={styles.paymentButton}
+                  onTouchStart={(e) => e.preventDefault()}
+                  onTouchEnd={(e) => e.preventDefault()}
+                >
+                  결제하러가기
+                </button>
               </div>
             </div>
           </Link>
@@ -45,7 +53,13 @@ export default function Home() {
                 취업에 필요한 자격증 발급 비용
               </p>
               <div className={styles.coursePrice}>
-                <button className={styles.paymentButton}>결제하러가기</button>
+                <button
+                  className={styles.paymentButton}
+                  onTouchStart={(e) => e.preventDefault()}
+                  onTouchEnd={(e) => e.preventDefault()}
+                >
+                  결제하러가기
+                </button>
               </div>
             </div>
           </Link>
