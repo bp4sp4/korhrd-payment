@@ -7,7 +7,11 @@ import styles from "./fail.module.css";
 
 export default function PaymentFailPage() {
   const searchParams = useSearchParams();
-  const [errorInfo, setErrorInfo] = useState<any>(null);
+  const [errorInfo, setErrorInfo] = useState<{
+    code: string | null;
+    message: string | null;
+    orderId: string | null;
+  } | null>(null);
 
   useEffect(() => {
     // URL 파라미터에서 에러 정보 추출

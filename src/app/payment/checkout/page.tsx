@@ -29,7 +29,6 @@ function CheckoutContent() {
   const type = searchParams.get("type");
   const [isPaymentReady, setIsPaymentReady] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [loadingStep, setLoadingStep] = useState<string>("초기화");
   const [domReady, setDomReady] = useState(false);
 
   const courseData = {
@@ -101,7 +100,6 @@ function CheckoutContent() {
 
     async function initializeTossPayments() {
       try {
-        setLoadingStep("SDK 로드 중...");
         console.log("토스페이먼츠 초기화 시작...");
 
         const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
@@ -115,21 +113,17 @@ function CheckoutContent() {
         );
 
         // SDK 로드
-        setLoadingStep("SDK 다운로드 중...");
         const { loadTossPayments, ANONYMOUS } = await import(
           "@tosspayments/tosspayments-sdk"
         );
 
-        setLoadingStep("토스페이먼츠 초기화 중...");
         const tossPayments = await loadTossPayments(clientKey);
 
-        setLoadingStep("위젯 생성 중...");
         const widgets = tossPayments.widgets({
           customerKey: ANONYMOUS,
         });
 
         // 결제 금액 설정
-        setLoadingStep("결제 금액 설정 중...");
         await widgets.setAmount({
           currency: "KRW",
           value: currentData.price,
@@ -138,7 +132,6 @@ function CheckoutContent() {
         console.log("결제 금액 설정 완료:", currentData.price);
 
         // 위젯 렌더링
-        setLoadingStep("위젯 렌더링 중...");
         await Promise.all([
           widgets.renderPaymentMethods({
             selector: "#payment-method",
@@ -151,30 +144,30 @@ function CheckoutContent() {
         ]);
 
         console.log("토스페이먼츠 위젯 렌더링 완료");
-        setLoadingStep("완료");
         setIsPaymentReady(true);
         setPaymentError(null);
 
         // 결제 요청 함수를 전역으로 저장
-        (window as any).requestTossPayment = async () => {
-          try {
-            // 고객 정보를 명시적으로 제외하고 필수 파라미터만 전달
-            const paymentData = {
-              orderId: `order_${Date.now()}_${Math.random()
-                .toString(36)
-                .substr(2, 9)}`,
-              orderName: currentData.title,
-              successUrl: `${window.location.origin}/payment/success`,
-              failUrl: `${window.location.origin}/payment/fail`,
-            };
+        (window as unknown as Record<string, unknown>).requestTossPayment =
+          async () => {
+            try {
+              // 고객 정보를 명시적으로 제외하고 필수 파라미터만 전달
+              const paymentData = {
+                orderId: `order_${Date.now()}_${Math.random()
+                  .toString(36)
+                  .substr(2, 9)}`,
+                orderName: currentData.title,
+                successUrl: `${window.location.origin}/payment/success`,
+                failUrl: `${window.location.origin}/payment/fail`,
+              };
 
-            console.log("결제 요청 데이터:", paymentData);
-            await widgets.requestPayment(paymentData);
-          } catch (error) {
-            console.error("결제 요청 실패:", error);
-            alert("결제 요청에 실패했습니다. 다시 시도해주세요.");
-          }
-        };
+              console.log("결제 요청 데이터:", paymentData);
+              await widgets.requestPayment(paymentData);
+            } catch (error) {
+              console.error("결제 요청 실패:", error);
+              alert("결제 요청에 실패했습니다. 다시 시도해주세요.");
+            }
+          };
       } catch (error) {
         console.error("토스페이먼츠 초기화 실패:", error);
         setPaymentError(`토스페이먼츠 초기화에 실패했습니다: ${error}`);
@@ -182,7 +175,7 @@ function CheckoutContent() {
     }
 
     initializeTossPayments();
-  }, [domReady, currentData.price]);
+  }, [domReady, currentData.price, currentData.title]);
 
   // 결제 요청
   const handlePayment = async () => {
@@ -191,8 +184,10 @@ function CheckoutContent() {
       return;
     }
 
-    if ((window as any).requestTossPayment) {
-      await (window as any).requestTossPayment();
+    const requestPayment = (window as unknown as Record<string, unknown>)
+      .requestTossPayment as (() => Promise<void>) | undefined;
+    if (requestPayment) {
+      await requestPayment();
     } else {
       alert("결제 시스템이 준비되지 않았습니다.");
     }
